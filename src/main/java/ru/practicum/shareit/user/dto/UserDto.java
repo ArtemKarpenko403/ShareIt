@@ -6,17 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
-    private Long id;          // Уникальный идентификатор
-    
+    private Long id;
     @NotBlank(message = "Имя не может быть пустым")
-    private String name;      // Имя или логин
-
+    private String name;
     @NotBlank(message = "Email не может быть пустым")
     @Email(message = "Некорректный формат email")
-    private String email;     // Адрес электронной почты
+    private String email;
 }
