@@ -24,8 +24,8 @@ public class JacksonConfig {
     }
 
     private static final JsonSerializer<LocalDate> LOCAL_DATE_SERIALIZER =
-        new LocalDateSerializer(DateTimeFormatter.ISO_DATE);
+            new LocalDateSerializer(DateTimeFormatter.ISO_DATE);
 
     private static final JsonDeserializer<LocalDate> LOCAL_DATE_DESERIALIZER =
-        new LocalDateDeserializer(DateTimeFormatter.ISO_DATE);
+            new LocalDateDeserializer(DateTimeFormatter.ISO_DATE);
 }

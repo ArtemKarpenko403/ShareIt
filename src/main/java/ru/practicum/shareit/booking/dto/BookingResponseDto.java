@@ -5,6 +5,7 @@ import lombok.Data;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.dto.ItemShortDto;  // Краткая информация о вещи
 import ru.practicum.shareit.user.dto.UserShortDto;  // Краткая информация о пользователе
+
 import java.time.LocalDateTime;
 
 @Data

@@ -22,17 +22,17 @@ public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @NotBlank
     private String description;
-    
+
     @ManyToOne
     @JoinColumn(name = "requester_id", nullable = false)
     private User requester;
-    
+
     @Column(nullable = false)
     private LocalDateTime created;
-    
+
     @OneToMany(mappedBy = "request")
     private List<Item> items;
 }

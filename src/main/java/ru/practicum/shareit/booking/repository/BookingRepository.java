@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,4 +38,21 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // Проверка завершенных бронирований
     boolean existsByBookerIdAndItemIdAndEndBefore(Long bookerId, Long itemId, LocalDateTime end);
+
+    @EntityGraph(attributePaths = {"booker"})
+    @Query("SELECT b FROM Booking b " +
+            "WHERE b.item.id = :itemId " +
+            "AND b.start < :now " +
+            "AND b.status = 'APPROVED' " +
+            "ORDER BY b.start DESC")
+    List<Booking> findLastBookings(@Param("itemId") Long itemId,
+                                   @Param("now") LocalDateTime now);
+
+    @Query("SELECT b FROM Booking b " +
+            "WHERE b.item.id = :itemId " +
+            "AND b.start > :now " +
+            "AND b.status = 'APPROVED' " +
+            "ORDER BY b.start ASC")
+    List<Booking> findNextBookings(@Param("itemId") Long itemId,
+                                   @Param("now") LocalDateTime now);
 }

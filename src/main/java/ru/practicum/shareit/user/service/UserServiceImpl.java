@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         // Проверка на конфликт email (если email изменён и уже занят)
-        if (userDto.getEmail() != null 
+        if (userDto.getEmail() != null
                 && !userDto.getEmail().equals(existingUser.getEmail())
                 && userRepository.existsByEmail(userDto.getEmail())) {
             throw new ConflictException("Email уже используется другим пользователем");

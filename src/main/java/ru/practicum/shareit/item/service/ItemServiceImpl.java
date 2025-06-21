@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.comment.mapper.CommentMapper;
 import ru.practicum.shareit.comment.repository.CommentRepository;
@@ -11,6 +12,7 @@ import ru.practicum.shareit.comment.dto.CommentResponseDto;
 import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.BookingForItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -62,14 +64,18 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto getItemById(Long itemId) {
+    public ItemDto getItemById(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
         ItemDto itemDto = ItemMapper.toItemDto(item);
-
-        // Добавляем комментарии к DTO
         itemDto.setComments(getItemComments(itemId));
+
+        // Показываем бронирования только владельцу
+        if (item.getOwner().getId().equals(userId)) {
+            itemDto.setLastBooking(getLastBooking(itemId));
+            itemDto.setNextBooking(getNextBooking(itemId));
+        }
 
         return itemDto;
     }
@@ -135,5 +141,33 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(CommentMapper::toCommentResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    private BookingForItemDto getLastBooking(Long itemId) {
+        List<Booking> bookings = bookingRepository.findLastBookings(itemId, LocalDateTime.now());
+        if (bookings.isEmpty()) {
+            return null;
+        }
+        Booking lastBooking = bookings.get(0);
+        return BookingForItemDto.builder()
+                .id(lastBooking.getId())
+                .bookerId(lastBooking.getBooker().getId())
+                .start(lastBooking.getStart())
+                .end(lastBooking.getEnd())
+                .build();
+    }
+
+    private BookingForItemDto getNextBooking(Long itemId) {
+        List<Booking> bookings = bookingRepository.findNextBookings(itemId, LocalDateTime.now());
+        if (bookings.isEmpty()) {
+            return null;
+        }
+        Booking nextBooking = bookings.get(0);
+        return BookingForItemDto.builder()
+                .id(nextBooking.getId())
+                .bookerId(nextBooking.getBooker().getId())
+                .start(nextBooking.getStart())
+                .end(nextBooking.getEnd())
+                .build();
     }
 }

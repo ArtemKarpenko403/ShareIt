@@ -32,11 +32,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public ItemRequestDto createRequest(Long userId, ItemRequestCreateDto requestDto) {
         User requester = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        
+
         ItemRequest request = requestMapper.toItemRequest(requestDto);
         request.setRequester(requester);
         request.setCreated(LocalDateTime.now());
-        
+
         return requestMapper.toDto(requestRepository.save(request));
     }
 
@@ -44,7 +44,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDto> getUserRequests(Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        
+
         return requestRepository.findByRequesterIdOrderByCreatedDesc(userId).stream()
                 .map(request -> {
                     ItemRequestDto dto = requestMapper.toDto(request);
@@ -58,9 +58,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDto> getAllRequests(Long userId, int from, int size) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        
+
         Pageable page = PageRequest.of(from / size, size, Sort.by("created").descending());
-        
+
         return requestRepository.findByRequesterIdNot(userId, page).stream()
                 .map(request -> {
                     ItemRequestDto dto = requestMapper.toDto(request);
@@ -74,10 +74,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public ItemRequestDto getRequestById(Long userId, Long requestId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        
+
         ItemRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Запрос не найден"));
-        
+
         ItemRequestDto dto = requestMapper.toDto(request);
         dto.setItems(getItemsForRequest(requestId));
         return dto;
