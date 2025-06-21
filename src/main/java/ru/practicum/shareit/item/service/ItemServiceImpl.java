@@ -15,8 +15,10 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -30,23 +32,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final Map<Long, Item> items = new HashMap<>();
-    private long  idCounter = 1;
-    private final UserService userService;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
-
+    private final ItemRequestRepository requestRepository;
 
     @Override
     public ItemDto updateItem(Long itemId, Long ownerId, ItemDto itemDto) {
-        Item existingItem = items.get(itemId);
-        if (existingItem == null) {
-            throw new NotFoundException("Вещь не найдена");
-        }
+        Item existingItem = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
+
         if (!existingItem.getOwner().getId().equals(ownerId)) {
             throw new ForbiddenException("Редактировать может только владелец");
         }
+
         if (itemDto.getName() != null) {
             existingItem.setName(itemDto.getName());
         }
@@ -56,7 +56,9 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             existingItem.setAvailable(itemDto.getAvailable());
         }
-        return ItemMapper.toItemDto(existingItem);
+
+        Item updatedItem = itemRepository.save(existingItem); // Сохраняем изменения
+        return ItemMapper.toItemDto(updatedItem);
     }
 
     @Override
@@ -97,10 +99,13 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto createItem(Long ownerId, ItemDto itemDto) {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        Item item = ItemMapper.toItem(itemDto,owner);
-        // Если вещь создается по запросу
+
+        Item item = ItemMapper.toItem(itemDto, owner);
+
         if (itemDto.getRequestId() != null) {
-            item.setRequestId(itemDto.getRequestId());
+            ItemRequest request = requestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException("Запрос не найден"));
+            item.setRequest(request);
         }
 
         return ItemMapper.toItemDto(itemRepository.save(item));

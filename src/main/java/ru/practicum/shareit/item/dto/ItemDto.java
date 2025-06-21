@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ItemDto {
     private Long id;
-    private Long requestId;
+
     @NotBlank(message = "Название не может быть пустым")
     private String name;
 
@@ -28,4 +28,6 @@ public class ItemDto {
 
     private Long ownerId;
     private List<CommentResponseDto> comments;
+
+    private Long requestId;
 }
