@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,6 +7,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,26 +15,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private final UserRepository userRepository;
     private final Map<Long, User> users = new HashMap<>();
     private final Map<String, Long> emailToIdMap = new HashMap<>();
     private long idCounter = 1;  // Счётчик ID
-
-    @Override
-    public UserDto createUser(UserDto userDto) {
-        // Проверяем уникальность email
-        if (emailToIdMap.containsKey(userDto.getEmail())) {
-            throw new ConflictException("Email уже используется");
-        }
-
-        User user = UserMapper.toUser(userDto);
-        user.setId(idCounter++);
-
-        // Сохраняем в обе мапы
-        users.put(user.getId(), user);
-        emailToIdMap.put(user.getEmail(), user.getId());
-
-        return UserMapper.toUserDto(user);
-    }
 
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
@@ -84,4 +69,12 @@ public class UserServiceImpl implements UserService {
         users.remove(userId);
     }
 
+    @Override
+    public UserDto createUser(UserDto userDto) {
+        if (userRepository.existsByEmail(userDto.getEmail())) {
+            throw new ConflictException("Email уже используется");
+        }
+        User user = UserMapper.toUser(userDto);
+        return UserMapper.toUserDto(userRepository.save(user));
+    }
 }
