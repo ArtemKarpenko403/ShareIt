@@ -16,24 +16,24 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                              HttpServletResponse response,
                              Object handler) {
         if (handler instanceof HandlerMethod) {
-            log.info("Incoming request: {} {} from {}", 
-                request.getMethod(), 
-                request.getRequestURI(),
-                request.getRemoteAddr());
+            log.info("Incoming request: {} {} from {}",
+                    request.getMethod(),
+                    request.getRequestURI(),
+                    request.getRemoteAddr());
         }
         return true;
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, 
-                               HttpServletResponse response, 
-                               Object handler, 
-                               Exception ex) {
+    public void afterCompletion(HttpServletRequest request,
+                                HttpServletResponse response,
+                                Object handler,
+                                Exception ex) {
         if (handler instanceof HandlerMethod) {
-            log.info("Completed request: {} {} - Status {}", 
-                request.getMethod(), 
-                request.getRequestURI(),
-                response.getStatus());
+            log.info("Completed request: {} {} - Status {}",
+                    request.getMethod(),
+                    request.getRequestURI(),
+                    response.getStatus());
         }
     }
 }
